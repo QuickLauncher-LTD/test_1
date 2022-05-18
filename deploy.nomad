@@ -1,4 +1,4 @@
-job testapp_qz5kzika {
+job my_sample_app_qz5kzika {
 
   datacenters = ["dc1"]
 
@@ -28,7 +28,7 @@ job testapp_qz5kzika {
       driver = "docker"
 
       config {
-        image = "868771833856.dkr.ecr.ap-northeast-2.amazonaws.com/testapp_qz5kzika:latest"
+        image = "868771833856.dkr.ecr.ap-northeast-2.amazonaws.com/my_sample_app_qz5kzika:latest"
         ports = ["http"]
       }
     }
