@@ -3,7 +3,7 @@ project = "my_sample_app_qz5kzika"
 app "my_sample_app_qz5kzika" {
   build {
     use "pack" {
-      builder = "paketobuildpacks/builder:base"
+      builder = "gcr.io/buildpacks/builder:v1"
     }
     registry {
       use "docker" {
