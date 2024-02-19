@@ -1,4 +1,4 @@
-name: Update PR Description
+name: Update PR Description with Commit Messages
 
 on:
   pull_request_target:
@@ -10,11 +10,13 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
       - name: Get Commit Messages
         id: get-commit-messages
         run: |
-          # PR의 베이스 브랜치(예: main)와 HEAD 브랜치 간의 커밋 메시지 추출
+          # PR의 베이스 브랜치와 HEAD 브랜치 간의 커밋 메시지 추출
           commit_messages=$(git log --format=%B origin/${{ github.base_ref }}..origin/${{ github.head_ref }})
           commit_messages="${commit_messages//'%'/'%25'}"
           commit_messages="${commit_messages//$'\n'/'%0A'}"
@@ -25,13 +27,14 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # 현재 PR의 내용을 가져옵니다.
+          # 현재 PR의 설명을 가져옵니다.
           PR_DESCRIPTION=$(gh pr view ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --json body -q .body)
 
-          # 새로운 내용을 추가합니다.
+          # 새로운 내용을 추가합니다. 커밋 메시지를 포함시킵니다.
           UPDATED_DESCRIPTION="${PR_DESCRIPTION}
           ---
-          ${{ steps.get-commit-messages.outputs.messages }}
+          ### Commit Messages
+          ${{ steps.get-commit-messages.outputs.messages }}"
 
           # PR의 설명을 업데이트합니다.
           gh pr edit ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --body "$UPDATED_DESCRIPTION"
