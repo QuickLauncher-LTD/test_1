@@ -30,4 +30,4 @@ jobs:
           ```
           ${{ steps.get-commit-messages.outputs.messages }}
           ```
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.DAE_GITHUB_TOKEN }}
