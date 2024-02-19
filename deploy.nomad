@@ -10,7 +10,6 @@ job my_sample_app_qz5kzika {
         to = 80
       }
     }
-
     service {
       name = "demo-quicklauncher"
       port = "http"
