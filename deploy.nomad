@@ -1,7 +1,6 @@
 job my_sample_app_qz5kzika {
 
   datacenters = ["dc1"]
-
   group "quick-launcher" {
     count = 1
     network {
