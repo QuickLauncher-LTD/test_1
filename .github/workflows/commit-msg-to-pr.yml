@@ -31,8 +31,7 @@ jobs:
           PR_DESCRIPTION=$(gh pr view ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --json body -q .body)
 
           PR_HEADER=$(echo "$PR_DESCRIPTION" | sed '/### Commit Messages/q')
-          UPDATED_DESCRIPTION="${PR_HEADER}### Commit Messages
-${{ steps.get-commit-messages.outputs.messages }}"
+          UPDATED_DESCRIPTION="${PR_HEADER}### Commit Messages \n${{ steps.get-commit-messages.outputs.messages }}"
 
           # # 새로운 내용을 추가합니다. 커밋 메시지를 포함시킵니다.
           # UPDATED_DESCRIPTION="${PR_DESCRIPTION}
