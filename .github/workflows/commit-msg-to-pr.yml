@@ -11,6 +11,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Get Commit Messages
+        id: get-commit-messages
+        run: |
+          # PR의 베이스 브랜치(예: main)와 HEAD 브랜치 간의 커밋 메시지 추출
+          commit_messages=$(git log --format=%B origin/${{ github.base_ref }}..origin/${{ github.head_ref }})
+          commit_messages="${commit_messages//'%'/'%25'}"
+          commit_messages="${commit_messages//$'\n'/'%0A'}"
+          commit_messages="${commit_messages//$'\r'/'%0D'}"
+          echo "::set-output name=messages::$commit_messages"
+
       - name: Update PR description
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -21,7 +31,7 @@ jobs:
           # 새로운 내용을 추가합니다.
           UPDATED_DESCRIPTION="${PR_DESCRIPTION}
           ---
-          추가된 내용: 여기에 새로운 내용을 추가합니다."
+          ${{ steps.get-commit-messages.outputs.messages }}
 
           # PR의 설명을 업데이트합니다.
           gh pr edit ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --body "$UPDATED_DESCRIPTION"
