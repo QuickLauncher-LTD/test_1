@@ -2,7 +2,7 @@ name: Update PR Description with Commit Messages
 
 on:
   pull_request_target:
-    types: [opened, reopen, synchronize]
+    types: [opened, reopened, synchronize]
 
 jobs:
   update-description:
