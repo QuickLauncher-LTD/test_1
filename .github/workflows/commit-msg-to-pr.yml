@@ -1,34 +1,27 @@
-name: PR Commit Messages
+name: Update PR Description
 
 on:
-  pull_request:
+  pull_request_target:
     types: [opened, synchronize]
 
 jobs:
-  comment-commit-messages:
+  update-description:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
-      with:
-        fetch-depth: 0
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Get Commit Messages
-      id: get-commit-messages
-      run: |
-        # PR의 베이스 브랜치(예: main)와 HEAD 브랜치 간의 커밋 메시지 추출
-        commit_messages=$(git log --format=%B origin/${{ github.base_ref }}..origin/${{ github.head_ref }})
-        commit_messages="${commit_messages//'%'/'%25'}"
-        commit_messages="${commit_messages//$'\n'/'%0A'}"
-        commit_messages="${commit_messages//$'\r'/'%0D'}"
-        echo "::set-output name=messages::$commit_messages"
+      - name: Update PR description
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # 현재 PR의 내용을 가져옵니다.
+          PR_DESCRIPTION=$(gh pr view ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --json body -q .body)
 
-    - name: Comment PR
-      uses: thollander/actions-comment-pull-request@v1
-      with:
-        message: |
-          ### Commit Messages
-          ```
-          ${{ steps.get-commit-messages.outputs.messages }}
-          ```
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # 새로운 내용을 추가합니다.
+          UPDATED_DESCRIPTION="${PR_DESCRIPTION}
+          ---
+          추가된 내용: 여기에 새로운 내용을 추가합니다."
+
+          # PR의 설명을 업데이트합니다.
+          gh pr edit ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --body "$UPDATED_DESCRIPTION"
