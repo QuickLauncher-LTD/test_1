@@ -1,0 +1,33 @@
+name: PR Commit Messages
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  comment-commit-messages:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - name: Get Commit Messages
+      id: get-commit-messages
+      run: |
+        commit_messages=$(git log --format=%B ${{ github.event.before }}..${{ github.event.after }})
+        commit_messages="${commit_messages//'%'/'%25'}"
+        commit_messages="${commit_messages//$'\n'/'%0A'}"
+        commit_messages="${commit_messages//$'\r'/'%0D'}"
+        echo "::set-output name=messages::$commit_messages"
+
+    - name: Comment PR
+      uses: thollander/actions-comment-pull-request@v1
+      with:
+        message: |
+          ### Commit Messages
+          ```
+          ${{ steps.get-commit-messages.outputs.messages }}
+          ```
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
