@@ -30,7 +30,7 @@ jobs:
           # PR 설명에서 기존 커밋 메시지 섹션을 찾아 교체합니다. 없으면 추가합니다.
           PR_HEADER=$(echo "$PR_DESCRIPTION" | sed '/### Commit Messages/q')
           UPDATED_DESCRIPTION="${PR_HEADER}### Commit Messages
-${{ steps.get-commit-messages.outputs.messages }}"
+          ${{ steps.get-commit-messages.outputs.messages }}"
 
           # PR의 설명을 업데이트합니다.
           gh pr edit ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --body "$UPDATED_DESCRIPTION"
