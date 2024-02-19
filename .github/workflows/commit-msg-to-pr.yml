@@ -16,7 +16,8 @@ jobs:
     - name: Get Commit Messages
       id: get-commit-messages
       run: |
-        commit_messages=$(git log --format=%B ${{ github.event.before }}..${{ github.event.after }})
+        # PR의 베이스 브랜치(예: main)와 HEAD 브랜치 간의 커밋 메시지 추출
+        commit_messages=$(git log --format=%B origin/${{ github.base_ref }}..origin/${{ github.head_ref }})
         commit_messages="${commit_messages//'%'/'%25'}"
         commit_messages="${commit_messages//$'\n'/'%0A'}"
         commit_messages="${commit_messages//$'\r'/'%0D'}"
@@ -30,4 +31,4 @@ jobs:
           ```
           ${{ steps.get-commit-messages.outputs.messages }}
           ```
-        GITHUB_TOKEN: ${{ secrets.DAE_GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
