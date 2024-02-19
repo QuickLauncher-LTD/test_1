@@ -22,7 +22,6 @@ job my_sample_app_qz5kzika {
         timeout  = "2s"
       }
     }
-
     task "server" {
       driver = "docker"
 
@@ -33,5 +32,4 @@ job my_sample_app_qz5kzika {
     }
   }
 }
-
 
