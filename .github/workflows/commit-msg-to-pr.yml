@@ -37,8 +37,7 @@ jobs:
           # ${{ steps.get-commit-messages.outputs.messages }}"
 
           PR_HEADER=$(echo "$PR_DESCRIPTION" | sed '/### Commit Messages/q')
-          UPDATED_DESCRIPTION="${PR_HEADER}### Commit Messages
-${{ steps.get-commit-messages.outputs.messages }}"
+          UPDATED_DESCRIPTION="${PR_HEADER}### Commit Messages\n${{ steps.get-commit-messages.outputs.messages }}"
 
 
           # PR의 설명을 업데이트합니다.
