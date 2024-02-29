@@ -59,7 +59,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          comment_id=$(gh pr view ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --json comments -q '.comments[].id' | jq 'select(.body | contains("<!-- AI Summary Marker -->"))' | jq '.id')
+          comment_id=$(gh pr view ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --json comments -q '.comments[].id' | jq 'select(.body | contains("PR Check List"))' | jq '.id')
           if [ ! -z "$comment_id" ]; then
             gh api -X DELETE /repos/${{ github.repository }}/issues/comments/$comment_id
           fi
