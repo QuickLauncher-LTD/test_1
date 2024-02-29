@@ -52,7 +52,7 @@ jobs:
             -H "Authorization: Bearer $OPENAI_API_KEY" \
             -d @payload.json)
           echo "Response: $response"
-          summary=$(echo $response | jq -r '.choices[0].text')
+          summary=$(echo $response | jq -r '.choices[0].message.content')
           echo "::set-output name=summary::$summary"
         # run: |
         #   echo "Requesting summary from OpenAI..."
