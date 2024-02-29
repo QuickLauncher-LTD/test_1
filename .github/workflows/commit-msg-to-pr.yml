@@ -24,26 +24,31 @@ jobs:
         run: |
           # 커밋 메시지를 추출합니다.
           commit_messages=$(git log --reverse --format='%B%n' origin/${{ github.base_ref }}..origin/${{ github.head_ref }})
-      
-          echo "# 💻 주요 개발 내용"
-          echo "#### 커밋 메시지"
-          echo "```"
-      
-          # Markdown 형식으로 포맷팅하여 출력합니다.
-          echo "$commit_messages" | while IFS= read -r line; do
-            if [[ -z "$line" ]]; then
-              # 커밋 메시지 사이의 구분을 위해 빈 줄을 검사합니다.
-              echo -e "\n"
-            elif [[ "$line" == -* ]]; then
-              # 커밋 메시지가 "-"로 시작하는 경우(본문), ">"로 대체합니다.
-              echo "$line" | sed 's/- /**/' | sed 's/$/**/' 
+          
+          # Markdown 형식으로 포맷팅합니다.
+          formatted_messages=""
+          IFS=$'\n\n' # 커밋 메시지들을 분리하는 구분자를 설정합니다.
+          for message in $commit_messages; do
+            # 커밋 메시지의 첫 줄(제목)을 추출합니다.
+            title=$(echo "$message" | head -n 1)
+            # 커밋 메시지의 나머지 부분(본문)을 추출합니다.
+            body=$(echo "$message" | tail -n +2)
+            
+            # Markdown 형식으로 포맷팅합니다.
+            if [ ! -z "$body" ]; then
+              formatted_messages+="- **$title**  %0A> $body%0A%0A"
             else
-              # 그 외의 경우는 제목으로 간주하고 그대로 출력합니다.
-              echo "> $line"
+              formatted_messages+="- **$title**%0A%0A"
             fi
           done
-          echo "```"
+          
+          # 포맷팅된 메시지를 출력 변수로 설정합니다.
+          formatted_messages="${formatted_messages//'%'/'%25'}"
+          formatted_messages="${formatted_messages//$'\n'/'%0A'}"
+          formatted_messages="${formatted_messages//$'\r'/'%0D'}"
+          echo "::set-output name=messages::$formatted_messages"
 
+        
       - name: Ask ChatGPT for Summary
         id: chatgpt
         env:
