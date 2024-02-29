@@ -38,7 +38,7 @@ jobs:
           EOF
         
           # 파일을 사용하여 OpenAI에 요청
-          response=$(curl -s -X POST "https://api.openai.com/v1/completions" \
+          response=$(curl -s -X POST "https://api.openai.com/v1/chat/completions" \
             -H "Content-Type: application/json" \
             -H "Authorization: Bearer $OPENAI_API_KEY" \
             -d @payload.json)
