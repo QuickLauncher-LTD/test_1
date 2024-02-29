@@ -1,4 +1,4 @@
-name: Update PR Description with Commit Messages
+name: Update PR Description with Commit Messages and AI Summary
 
 on:
   pull_request_target:
@@ -16,18 +16,17 @@ jobs:
       - name: Get Commit Messages
         id: get-commit-messages
         run: |
-          commit_messages=$(git log --reverse --format=%B origin/${{ github.base_ref }}..origin/${{ github.head_ref }})
+          commit_messages=$(git log --reverse --format='%B%n' origin/${{ github.base_ref }}..origin/${{ github.head_ref }})
           commit_messages="${commit_messages//'%'/'%25'}"
           commit_messages="${commit_messages//$'\n'/'%0A'}"
           commit_messages="${commit_messages//$'\r'/'%0D'}"
           echo "::set-output name=messages::$commit_messages"
-
-      - name: Ask ChatGPT
+          
+      - name: Ask ChatGPT for Summary
         id: chatgpt
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
-          # JSON 요청 본문을 파일로 작성
           cat > payload.json <<EOF
           {
             "model": "gpt-3.5-turbo",
@@ -46,35 +45,24 @@ jobs:
           }
           EOF
         
-          # 파일을 사용하여 OpenAI에 요청
           response=$(curl -s -X POST "https://api.openai.com/v1/chat/completions" \
             -H "Content-Type: application/json" \
             -H "Authorization: Bearer $OPENAI_API_KEY" \
             -d @payload.json)
-          echo "Response: $response"
           summary=$(echo $response | jq -r '.choices[0].message.content')
+          summary="${summary//'%'/'%25'}"
+          summary="${summary//$'\n'/'%0A'}"
+          summary="${summary//$'\r'/'%0D'}"
           echo "::set-output name=summary::$summary"
-        # run: |
-        #   echo "Requesting summary from OpenAI..."
-        #   response=$(curl -s -X POST "https://api.openai.com/v1/completions" \
-        #     -H "Content-Type: application/json" \
-        #     -H "Authorization: Bearer $OPENAI_API_KEY" \
-        #     --data "{
-        #       \"model\": \"text-davinci-003\",
-        #       \"prompt\": \"다음은 GitHub Commit 메시지이다. 요약해줘:\\n${{ steps.get-commit-messages.outputs.messages }}\",
-        #       \"temperature\": 0.7,
-        #       \"max_tokens\": 150
-        #     }")
-        #   echo "Response: $response"
-        #   summary=$(echo $response | jq -r '.choices[0].text')
-        #   echo "::set-output name=summary::$summary"
-
           
       - name: Update PR description
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           PR_DESCRIPTION=$(gh pr view ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --json body -q .body)
+          COMMIT_MESSAGES_FORMATTED=$(echo "${{ steps.get-commit-messages.outputs.messages }}" | sed 's/%0A/\n/g')
+          AI_SUMMARY=$(echo "${{ steps.chatgpt.outputs.summary }}" | sed 's/%0A/\n/g')
+          
           UPDATED_DESCRIPTION="${PR_DESCRIPTION}
           ---
 
@@ -85,8 +73,13 @@ jobs:
           - [ ] All bugs are fixed
 
           💻  주요 개발 내용
-          ### 커밋 요약
-          ${{ steps.chatgpt.outputs.summary }}
+          ### 커밋 내용
+          \`\`\`
+          ${COMMIT_MESSAGES_FORMATTED}
+          \`\`\`
+
+          ### AI 요약
+          ${AI_SUMMARY}
 
           ⚙️ 테스트 내용 (모듈검증)
 
