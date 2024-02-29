@@ -12,6 +12,7 @@ app "my_sample_app_qz5kzika" {
       }
     }
   }
+
   deploy {
     use "docker" {
     }
