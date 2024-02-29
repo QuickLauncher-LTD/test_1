@@ -62,3 +62,29 @@ jobs:
 
           # PR의 설명을 업데이트합니다.
           gh pr edit ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --body "$UPDATED_DESCRIPTION"
+
+      - name: Ask ChatGPT
+        id: chatgpt
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          response=$(curl -s -X POST "https://api.openai.com/v1/completions" \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer $OPENAI_API_KEY" \
+            --data '{
+              "model": "text-davinci-003",
+              "prompt": "다음은 GitHub Commit 메시지이다. 요약해줘 \n $commit_messages",
+              "temperature": 0.7,
+              "max_tokens": 150
+            }')
+          answer=$(echo $response | jq -r '.choices[0].text')
+          echo "::set-output name=answer::$answer"
+
+      - name: Update PR description with ChatGPT response
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          PR_DESCRIPTION=$(gh pr view ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --json body -q .body)
+          UPDATED_DESCRIPTION="${PR_DESCRIPTION}\n\n### ChatGPT Response\n${{ steps.chatgpt.outputs.answer }}"
+
+          gh pr edit ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --body "$UPDATED_DESCRIPTION"
