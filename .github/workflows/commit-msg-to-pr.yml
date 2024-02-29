@@ -78,33 +78,33 @@ jobs:
           ---
           <!-- Auto PR Summary Marker -->
           
-          #✅  PR Check List
+          # ✅  PR Check List
           - [ ] Self code review finished
           - [ ] Spotless / static analysis finished
           - [ ] Module test finished
           - [ ] All bugs are fixed
 
-          #💻  주요 개발 내용
+          # 💻  주요 개발 내용
           #### 커밋 메시지
           \`\`\`
           ${COMMIT_MESSAGES_FORMATTED}
           \`\`\`
 
-          #🤖 AI 요약
+          # 🤖 AI 요약
           ${AI_SUMMARY}
 
-          #⚙️ 테스트 내용 (모듈검증)
+          # ⚙️ 테스트 내용 (모듈검증)
 
-          #⚙️ 테스트 내용 (통합검증)
+          # ⚙️ 테스트 내용 (통합검증)
           - 로컬 통합 테스트
 
-          #❓ Known issue
+          # ❓ Known issue
           - 없음
 
-          #🙏 To Reviewer
+          # 🙏 To Reviewer
           - 쿼리파라미터 입력 추가 건입니다. 로직은 동일합니다.
 
-          #🎫 Ticket 
+          # 🎫 Ticket 
           [CMP-551]: https://lgu-cto.atlassian.net/browse/CMP-551
           [CMP-552]: https://lgu-cto.atlassian.net/browse/CMP-552"
 
