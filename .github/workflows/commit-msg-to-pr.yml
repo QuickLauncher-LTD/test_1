@@ -22,32 +22,32 @@ jobs:
         #   commit_messages="${commit_messages//$'\r'/'%0D'}"
         #   echo "::set-output name=messages::$commit_messages"
         run: |
-          # 커밋 메시지 추출
-          IFS=$'\n' read -r -d '' -a commit_lines < <(git log --reverse --format='%B%n%n%n' origin/${{ github.base_ref }}..origin/${{ github.head_ref }} && printf '\0')
+          # 커밋 메시지를 추출합니다.
+          commit_messages=$(git log --reverse --format='%B%n' origin/${{ github.base_ref }}..origin/${{ github.head_ref }})
           
+          # Markdown 형식으로 포맷팅합니다.
           formatted_messages=""
-          for line in "${commit_lines[@]}"; do
-            if [[ "$line" == "feat: "* || "$line" == "fix: "* || "$line" == "chor: "* || "$line" == "config: "* ]]; then
-              # 타이틀 처리
-              if [ ! -z "$formatted_messages" ]; then
-                formatted_messages+='\n\n' # 이전 메시지와의 구분
-              fi
-              formatted_messages+="**$line**"
-            elif [ ! -z "$line" ]; then
-              # 바디 처리
-              if [[ "$formatted_messages" == *\*\*** ]]; then
-                formatted_messages+="\n> $line"
-              else
-                formatted_messages+="\n\n> $line"
-              fi
+          IFS=$'\n\n' # 커밋 메시지들을 분리하는 구분자를 설정합니다.
+          for message in $commit_messages; do
+            # 커밋 메시지의 첫 줄(제목)을 추출합니다.
+            title=$(echo "$message" | head -n 1)
+            # 커밋 메시지의 나머지 부분(본문)을 추출합니다.
+            body=$(echo "$message" | tail -n +2)
+            
+            # Markdown 형식으로 포맷팅합니다.
+            if [ ! -z "$body" ]; then
+              formatted_messages+="- **$title**  \n> $body\n\n"
+            else
+              formatted_messages+="- **$title**\n\n"
             fi
           done
-      
-          # 포맷팅된 메시지를 출력 변수로 설정
+          
+          # 포맷팅된 메시지를 출력 변수로 설정합니다.
           formatted_messages="${formatted_messages//'%'/'%25'}"
           formatted_messages="${formatted_messages//$'\n'/'%0A'}"
           formatted_messages="${formatted_messages//$'\r'/'%0D'}"
           echo "::set-output name=messages::$formatted_messages"
+
 
           
       - name: Ask ChatGPT for Summary
