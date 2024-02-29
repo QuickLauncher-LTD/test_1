@@ -74,7 +74,7 @@ jobs:
           COMMIT_MESSAGES_FORMATTED=$(echo "${{ steps.get-commit-messages.outputs.messages }}" | sed 's/%0A/\n/g')
           AI_SUMMARY=$(echo "${{ steps.chatgpt.outputs.summary }}" | sed 's/%0A/\n/g')
           
-          UPDATED_DESCRIPTION="${PR_DESCRIPTION}
+          UPDATED_DESCRIPTION="
           ---
           <!-- Auto PR Summary Marker -->
           
