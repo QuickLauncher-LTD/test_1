@@ -37,11 +37,11 @@ jobs:
               },
               {
                 "role": "user",
-                "content": "다음은 GitHub Commit 메시지이다. 요약해줘:\n${{ steps.get-commit-messages.outputs.messages }}"
+                "content": "아래는 GitHub에서의 최근 커밋 메시지들입니다. 각 커밋의 주요 내용을 요약하고, 전체적인 변경 사항에 대한 개요를 제공해주세요. 커밋 메시지들은 다음과 같습니다:\n${{ steps.get-commit-messages.outputs.messages }}"
               }
             ],
             "temperature": 0.7,
-            "max_tokens": 150
+            "max_tokens": 250
           }
           EOF
         
