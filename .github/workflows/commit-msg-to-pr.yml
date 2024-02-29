@@ -16,7 +16,6 @@ jobs:
       - name: Get Commit Messages
         id: get-commit-messages
         run: |
-          # PR의 베이스 브랜치와 HEAD 브랜치 간의 커밋 메시지 추출
           commit_messages=$(git log --reverse --format=%B origin/${{ github.base_ref }}..origin/${{ github.head_ref }})
           commit_messages="${commit_messages//'%'/'%25'}"
           commit_messages="${commit_messages//$'\n'/'%0A'}"
@@ -31,26 +30,23 @@ jobs:
           response=$(curl -s -X POST "https://api.openai.com/v1/completions" \
             -H "Content-Type: application/json" \
             -H "Authorization: Bearer $OPENAI_API_KEY" \
-            --data '{
-              "model": "text-davinci-003",
-              "prompt": "다음은 GitHub Commit 메시지이다. 요약해줘 \n $commit_messages",
-              "temperature": 0.7,
-              "max_tokens": 150
-            }')
-          commit_messages=$(echo $response | jq -r '.choices[0].text')
-          echo "::set-output name=answer::$commit_messages"
+            --data "{
+              \"model\": \"text-davinci-003\",
+              \"prompt\": \"다음은 GitHub Commit 메시지이다. 요약해줘:\\n${{ steps.get-commit-messages.outputs.messages }}\",
+              \"temperature\": 0.7,
+              \"max_tokens\": 150
+            }")
+          summary=$(echo $response | jq -r '.choices[0].text')
+          echo "::set-output name=summary::$summary"
           
       - name: Update PR description
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # 현재 PR의 설명을 가져옵니다.
           PR_DESCRIPTION=$(gh pr view ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --json body -q .body)
-
-          # 새로운 내용을 추가합니다. 여기에 원하는 텍스트를 추가하세요.
           UPDATED_DESCRIPTION="${PR_DESCRIPTION}
           ---
-          
+
           ✅  PR Check List
           - [ ] Self code review finished
           - [ ] Spotless / static analysis finished
@@ -58,9 +54,8 @@ jobs:
           - [ ] All bugs are fixed
 
           💻  주요 개발 내용
-          ### 커밋 내용
-          ${{ steps.get-commit-messages.outputs.messages }}
-          
+          ### 커밋 요약
+          ${{ steps.chatgpt.outputs.summary }}
 
           ⚙️ 테스트 내용 (모듈검증)
 
@@ -76,17 +71,5 @@ jobs:
           🎫 Ticket 
           [CMP-551]: https://lgu-cto.atlassian.net/browse/CMP-551
           [CMP-552]: https://lgu-cto.atlassian.net/browse/CMP-552"
-
-          # PR의 설명을 업데이트합니다.
-          gh pr edit ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --body "$UPDATED_DESCRIPTION"
-
-      
-
-      - name: Update PR description with ChatGPT response
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          PR_DESCRIPTION=$(gh pr view ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --json body -q .body)
-          UPDATED_DESCRIPTION="${PR_DESCRIPTION}\n\n### ChatGPT Response\n${{ steps.chatgpt.outputs.answer }}"
 
           gh pr edit ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --body "$UPDATED_DESCRIPTION"
