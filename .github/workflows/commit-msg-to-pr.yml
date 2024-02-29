@@ -30,15 +30,36 @@ jobs:
           # 현재 PR의 설명을 가져옵니다.
           PR_DESCRIPTION=$(gh pr view ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --json body -q .body)
 
-          # 새로운 내용을 추가합니다. 커밋 메시지를 포함시킵니다.
+          # 새로운 내용을 추가합니다. 여기에 원하는 텍스트를 추가하세요.
           UPDATED_DESCRIPTION="${PR_DESCRIPTION}
           ---
           ### Commit Messages
-          ${{ steps.get-commit-messages.outputs.messages }}"
+          ${{ steps.get-commit-messages.outputs.messages }}
 
-          # PR_HEADER=$(echo "$PR_DESCRIPTION" | sed '/### Commit Messages/q')
-          # UPDATED_DESCRIPTION="${PR_HEADER}### Commit Messages\n${{ steps.get-commit-messages.outputs.messages }}"
+          ✅  PR Check List
+          - [x] Self code review finished
+          - [x] Spotless / static analysis finished
+          - [x] Module test finished
+          - [x] All bugs are fixed
 
+          💻  주요 개발 내용
+          [CMP-552] 취약점 시크릿 대시보드 API
+          - 취약점 Top, 조치율 요청 시 org, repo 정보 쿼리파라미터 입력 추가
+
+          ⚙️ 테스트 내용 (모듈검증)
+
+          ⚙️ 테스트 내용 (통합검증)
+          - 로컬 통합 테스트
+
+          ❓ Known issue
+          - 없음
+
+          🙏 To Reviewer
+          - 쿼리파라미터 입력 추가 건입니다. 로직은 동일합니다.
+
+          🎫 Ticket 
+          [CMP-551]: https://lgu-cto.atlassian.net/browse/CMP-551
+          [CMP-552]: https://lgu-cto.atlassian.net/browse/CMP-552"
 
           # PR의 설명을 업데이트합니다.
           gh pr edit ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --body "$UPDATED_DESCRIPTION"
