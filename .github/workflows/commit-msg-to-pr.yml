@@ -15,69 +15,69 @@ jobs:
           
       - name: Get Commit Messages
         id: get-commit-messages
-        # run: |
-        #   # 커밋 메시지를 추출합니다.
-        #   commit_messages=$(git log --reverse --format='%B%n' origin/${{ github.base_ref }}..origin/${{ github.head_ref }})
-          
-        #   # Markdown 형식으로 포맷팅합니다.
-        #   formatted_messages=""
-        #   IFS=$'\n\n' # 커밋 메시지들을 분리하는 구분자를 설정합니다.
-        #   for message in $commit_messages; do
-        #     # 커밋 메시지의 첫 줄(제목)을 추출합니다.
-        #     title=$(echo "$message" | head -n 1)
-        #     # 커밋 메시지의 나머지 부분(본문)을 추출합니다.
-        #     body=$(echo "$message" | tail -n +2)
-            
-        #     # Markdown 형식으로 포맷팅합니다.
-        #     if [ ! -z "$body" ]; then
-        #       formatted_messages+="- **$title**\n  - $body\n\n"
-        #     else
-        #       formatted_messages+="- **$title**\n\n"
-        #     fi
-        #   done
-          
-        #   # 포맷팅된 메시지를 출력 변수로 설정합니다.
-        #   formatted_messages="${formatted_messages//'%'/'%25'}"
-        #   formatted_messages="${formatted_messages//$'\n'/'%0A'}"
-        #   formatted_messages="${formatted_messages//$'\r'/'%0D'}"
-        #   echo "::set-output name=formatted_messages::$formatted_messages"
         run: |
-          IFS=$'\n\n' # 커밋 메시지 단위로 분리합니다.
+          # 커밋 메시지를 추출합니다.
           commit_messages=$(git log --reverse --format='%B%n' origin/${{ github.base_ref }}..origin/${{ github.head_ref }})
+          
+          # Markdown 형식으로 포맷팅합니다.
           formatted_messages=""
-        
-          readarray -t messages <<<"$commit_messages" # 커밋 메시지를 배열로 변환합니다.
-          for message in "${messages[@]}"; do
-            if [[ -z "$message" ]]; then
-              continue # 빈 메시지는 건너뜁니다.
-            fi
-            
-            # 제목과 본문을 분리합니다.
-            title=$(echo "$message" | head -n1)
+          IFS=$'\n\n' # 커밋 메시지들을 분리하는 구분자를 설정합니다.
+          for message in $commit_messages; do
+            # 커밋 메시지의 첫 줄(제목)을 추출합니다.
+            title=$(echo "$message" | head -n 1)
+            # 커밋 메시지의 나머지 부분(본문)을 추출합니다.
             body=$(echo "$message" | tail -n +2)
             
-            # 본문이 있는 경우, 본문의 각 항목을 처리합니다.
-            if [[ ! -z "$body" ]]; then
-              body_lines=""
-              IFS=$'\n' # 본문 내부의 개행으로 분리합니다.
-              readarray -t lines <<<"$body"
-              for line in "${lines[@]}"; do
-                if [[ -z "$line" ]]; then
-                  continue
-                fi
-                body_lines+="  - $line\n"
-              done
-              formatted_messages+="- **$title**\n$body_lines\n"
+            # Markdown 형식으로 포맷팅합니다.
+            if [ ! -z "$body" ]; then
+              formatted_messages+="- **$title**\n  - $body\n\n"
             else
               formatted_messages+="- **$title**\n\n"
             fi
           done
-        
-          # 포맷팅된 커밋 메시지를 GitHub Actions의 출력 변수로 설정합니다.
+          
+          # 포맷팅된 메시지를 출력 변수로 설정합니다.
           formatted_messages="${formatted_messages//'%'/'%25'}"
           formatted_messages="${formatted_messages//$'\n'/'%0A'}"
           formatted_messages="${formatted_messages//$'\r'/'%0D'}"
           echo "::set-output name=messages::$formatted_messages"
+        # run: |
+        #   IFS=$'\n\n' # 커밋 메시지 단위로 분리합니다.
+        #   commit_messages=$(git log --reverse --format='%B%n' origin/${{ github.base_ref }}..origin/${{ github.head_ref }})
+        #   formatted_messages=""
+        
+        #   readarray -t messages <<<"$commit_messages" # 커밋 메시지를 배열로 변환합니다.
+        #   for message in "${messages[@]}"; do
+        #     if [[ -z "$message" ]]; then
+        #       continue # 빈 메시지는 건너뜁니다.
+        #     fi
+            
+        #     # 제목과 본문을 분리합니다.
+        #     title=$(echo "$message" | head -n1)
+        #     body=$(echo "$message" | tail -n +2)
+            
+        #     # 본문이 있는 경우, 본문의 각 항목을 처리합니다.
+        #     if [[ ! -z "$body" ]]; then
+        #       body_lines=""
+        #       IFS=$'\n' # 본문 내부의 개행으로 분리합니다.
+        #       readarray -t lines <<<"$body"
+        #       for line in "${lines[@]}"; do
+        #         if [[ -z "$line" ]]; then
+        #           continue
+        #         fi
+        #         body_lines+="  - $line\n"
+        #       done
+        #       formatted_messages+="- **$title**\n$body_lines\n"
+        #     else
+        #       formatted_messages+="- **$title**\n\n"
+        #     fi
+        #   done
+        
+        #   # 포맷팅된 커밋 메시지를 GitHub Actions의 출력 변수로 설정합니다.
+        #   formatted_messages="${formatted_messages//'%'/'%25'}"
+        #   formatted_messages="${formatted_messages//$'\n'/'%0A'}"
+        #   formatted_messages="${formatted_messages//$'\r'/'%0D'}"
+        #   echo "::set-output name=messages::$formatted_messages"
         # run: |
         #   commit_messages=$(git log --reverse --format='%B%n' origin/${{ github.base_ref }}..origin/${{ github.head_ref }})
         #   commit_messages="${commit_messages//'%'/'%25'}"
@@ -100,11 +100,11 @@ jobs:
               },
               {
                 "role": "user",
-                "content": "다음은 GitHub에서의 최근 커밋 메시지(title, body)들입니다. 각 커밋의 내용을 요약하고, 전체적인 변경 사항에 대한 개요를 한 줄로 제공해주세요. MD파일 양식으로 작성되므로 title은 -**[TITLE]**, body는 >[BODY] 규격에 맞게 작성합니다. 커밋 메시지들은 다음과 같습니다:\n${{ steps.get-commit-messages.outputs.messages }}"
+                "content": "다음은 GitHub에서의 최근 커밋 메시지들입니다. 각 커밋의 제목과 본문을 요약하고, 전체적인 변경 사항에 대한 개요를 제공해주세요. MD 파일 양식에 맞게, 각 커밋의 제목은 볼드(**)로 표시하고, 본문은 인용구(>)로 표시합니다. 커밋 메시지들은 다음과 같습니다:\n${{ steps.get-commit-messages.outputs.messages }}"
               }
             ],
             "temperature": 0.7,
-            "max_tokens": 250
+            "max_tokens": 500
           }
           EOF
         
