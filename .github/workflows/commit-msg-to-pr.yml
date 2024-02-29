@@ -59,11 +59,12 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          comments=$(gh issue view ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --json comments)
-          echo "$comments" | jq -c '.comments[] | select(.body | contains("<!-- Auto PR Summary Marker -->")) | .id' | while read -r comment_id; do
-            echo "Deleting comment ID: $comment_id"
-            gh api -X DELETE /repos/${{ github.repository }}/pulls/comments/$comment_id
-          done
+          comment_id=$(gh pr view ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --json comments -q '.comments[].id' | jq 'select(.body | contains("<!-- AI Summary Marker -->"))' | jq '.id')
+          echo $comment_id
+          if [ ! -z "$comment_id" ]; then
+            gh api -X DELETE /repos/${{ github.repository }}/issues/comments/$comment_id
+          fi
+
       
       - name: Update PR description
         env:
