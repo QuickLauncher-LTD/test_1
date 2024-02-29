@@ -12,7 +12,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
-
+          
       - name: Get Commit Messages
         id: get-commit-messages
         run: |
@@ -23,6 +23,23 @@ jobs:
           commit_messages="${commit_messages//$'\r'/'%0D'}"
           echo "::set-output name=messages::$commit_messages"
 
+      - name: Ask ChatGPT
+        id: chatgpt
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          response=$(curl -s -X POST "https://api.openai.com/v1/completions" \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer $OPENAI_API_KEY" \
+            --data '{
+              "model": "text-davinci-003",
+              "prompt": "다음은 GitHub Commit 메시지이다. 요약해줘 \n $commit_messages",
+              "temperature": 0.7,
+              "max_tokens": 150
+            }')
+          commit_messages=$(echo $response | jq -r '.choices[0].text')
+          echo "::set-output name=answer::$commit_messages"
+          
       - name: Update PR description
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -35,10 +52,10 @@ jobs:
           ---
           
           ✅  PR Check List
-          - [] Self code review finished
-          - [] Spotless / static analysis finished
-          - [] Module test finished
-          - [] All bugs are fixed
+          - [ ] Self code review finished
+          - [ ] Spotless / static analysis finished
+          - [ ] Module test finished
+          - [ ] All bugs are fixed
 
           💻  주요 개발 내용
           ### 커밋 내용
@@ -63,22 +80,7 @@ jobs:
           # PR의 설명을 업데이트합니다.
           gh pr edit ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --body "$UPDATED_DESCRIPTION"
 
-      - name: Ask ChatGPT
-        id: chatgpt
-        env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        run: |
-          response=$(curl -s -X POST "https://api.openai.com/v1/completions" \
-            -H "Content-Type: application/json" \
-            -H "Authorization: Bearer $OPENAI_API_KEY" \
-            --data '{
-              "model": "text-davinci-003",
-              "prompt": "다음은 GitHub Commit 메시지이다. 요약해줘 \n $commit_messages",
-              "temperature": 0.7,
-              "max_tokens": 150
-            }')
-          answer=$(echo $response | jq -r '.choices[0].text')
-          echo "::set-output name=answer::$answer"
+      
 
       - name: Update PR description with ChatGPT response
         env:
