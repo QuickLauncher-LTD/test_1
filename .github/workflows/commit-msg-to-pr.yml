@@ -18,10 +18,14 @@ jobs:
         run: |
           # 커밋 메시지를 추출합니다.
           commit_messages=$(git log --reverse --format='%B%n' origin/${{ github.base_ref }}..origin/${{ github.head_ref }})
-          
+
+          commit_messages="${commit_messages//'%'/'%25'}"
+          commit_messages="${commit_messages//$'\n'/'%0A'}"
+          commit_messages="${commit_messages//$'\r'/'%0D'}"
+        
           # Markdown 형식으로 포맷팅합니다.
           formatted_messages=""
-          IFS=$'\n\n' # 커밋 메시지들을 분리하는 구분자를 설정합니다.
+          IFS=$'%0A' # 커밋 메시지들을 분리하는 구분자를 설정합니다.
           for message in $commit_messages; do
             # 커밋 메시지의 첫 줄(제목)을 추출합니다.
             title=$(echo "$message" | head -n 1)
@@ -30,9 +34,9 @@ jobs:
             
             # Markdown 형식으로 포맷팅합니다.
             if [ ! -z "$body" ]; then
-              formatted_messages+="- **$title**\n  - $body\n\n"
+              formatted_messages+="- **$title**%0A  - $body\n\n"
             else
-              formatted_messages+="- **$title**\n\n"
+              formatted_messages+="- **$title**%0A%0A"
             fi
           done
           
