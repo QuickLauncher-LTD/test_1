@@ -108,4 +108,4 @@ jobs:
           [CMP-551]: https://lgu-cto.atlassian.net/browse/CMP-551
           [CMP-552]: https://lgu-cto.atlassian.net/browse/CMP-552"
 
-          gh pr comment ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --body "$UPDATED_DESCRIPTION"
+          gh pr edit ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --body "$UPDATED_DESCRIPTION"
