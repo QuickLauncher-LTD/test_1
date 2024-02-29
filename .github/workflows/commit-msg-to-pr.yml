@@ -82,12 +82,12 @@ jobs:
           - [ ] All bugs are fixed
 
           💻  주요 개발 내용
-          ### 커밋 내용
+          #### 커밋 메시지
           \`\`\`
           ${COMMIT_MESSAGES_FORMATTED}
           \`\`\`
 
-          ### AI 요약
+          🤖 AI 요약
           ${AI_SUMMARY}
 
           ⚙️ 테스트 내용 (모듈검증)
