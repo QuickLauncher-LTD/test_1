@@ -77,8 +77,7 @@ jobs:
           formatted_messages="${formatted_messages//'%'/'%25'}"
           formatted_messages="${formatted_messages//$'\n'/'%0A'}"
           formatted_messages="${formatted_messages//$'\r'/'%0D'}"
-          echo "::set-output name=formatted_messages::$formatted_messages"
-
+          echo "::set-output name=messages::$formatted_messages"
         # run: |
         #   commit_messages=$(git log --reverse --format='%B%n' origin/${{ github.base_ref }}..origin/${{ github.head_ref }})
         #   commit_messages="${commit_messages//'%'/'%25'}"
