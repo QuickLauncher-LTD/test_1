@@ -17,7 +17,7 @@ jobs:
         id: get-commit-messages
         run: |
           # PR의 베이스 브랜치와 HEAD 브랜치 간의 커밋 메시지 추출
-          commit_messages=$(git log --format=%B origin/${{ github.base_ref }}..origin/${{ github.head_ref }})
+          commit_messages=$(git log --reverse --format=%B origin/${{ github.base_ref }}..origin/${{ github.head_ref }})
           commit_messages="${commit_messages//'%'/'%25'}"
           commit_messages="${commit_messages//$'\n'/'%0A'}"
           commit_messages="${commit_messages//$'\r'/'%0D'}"
@@ -33,18 +33,17 @@ jobs:
           # 새로운 내용을 추가합니다. 여기에 원하는 텍스트를 추가하세요.
           UPDATED_DESCRIPTION="${PR_DESCRIPTION}
           ---
-          ### Commit Messages
-          ${{ steps.get-commit-messages.outputs.messages }}
-
+          
           ✅  PR Check List
-          - [x] Self code review finished
-          - [x] Spotless / static analysis finished
-          - [x] Module test finished
-          - [x] All bugs are fixed
+          - [] Self code review finished
+          - [] Spotless / static analysis finished
+          - [] Module test finished
+          - [] All bugs are fixed
 
           💻  주요 개발 내용
-          [CMP-552] 취약점 시크릿 대시보드 API
-          - 취약점 Top, 조치율 요청 시 org, repo 정보 쿼리파라미터 입력 추가
+          ### 커밋 내용
+          ${{ steps.get-commit-messages.outputs.messages }}
+          
 
           ⚙️ 테스트 내용 (모듈검증)
 
