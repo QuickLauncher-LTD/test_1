@@ -13,42 +13,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      # - name: Get Commit Messages
-      #   id: get-commit-messages
-      #   run: |
-      #     # 커밋 메시지를 추출하면서 제목과 본문을 분리하는 명확한 구분자를 사용합니다.
-      #     commit_messages=$(git log --reverse --format='%s%n%n%b%n-----' origin/${{ github.base_ref }}..origin/${{ github.head_ref }})
-      #     echo "$commit_messages"
-          
-      #     # Markdown 형식으로 포맷팅합니다.
-      #     formatted_messages=""
-      #     IFS='-----' read -r -a messages_array <<< "$commit_messages"
-      #     for message in "${messages_array[@]}"; do
-      #       if [[ -z "$message" ]]; then
-      #         continue
-      #       fi
-      #       # 첫 번째 줄(제목)을 추출합니다.
-      #       title=$(echo "$message" | head -n1)
-      #       # 두 번째 줄부터 본문을 추출합니다. 여기서 sed를 사용하여 첫 두 줄을 제거합니다.
-      #       body=$(echo "$message" | sed -e '1d' -e '/^$/d')
-            
-      #       title_trimmed=$(echo "$title" | xargs)
-      #       body_trimmed=$(echo "$body" | xargs)
-            
-      #       if [ ! -z "$body_trimmed" ]; then
-      #         formatted_messages+="- **$title_trimmed**  %0A> $body_trimmed%0A%0A"
-      #       else
-      #         formatted_messages+="- **$title_trimmed**%0A%0A"
-      #       fi
-      #     done
-      
-      #     echo "$formatted_messages"
-      #     # 포맷팅된 메시지를 출력 변수로 설정합니다.
-      #     formatted_messages="${formatted_messages//'%'/'%25'}"
-      #     formatted_messages="${formatted_messages//$'\n'/'%0A'}"
-      #     formatted_messages="${formatted_messages//$'\r'/'%0D'}"
-      #     echo "::set-output name=messages::$formatted_messages"
-
       - name: Get Commit Messages
         id: get-commit-messages
         run: |
