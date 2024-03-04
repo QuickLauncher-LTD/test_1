@@ -16,7 +16,7 @@ jobs:
       - name: Get Commit Messages
         id: get-commit-messages
         run: |
-          commit_messages=$(git log --reverse --format='%B%n----------' origin/${{ github.base_ref }}..origin/${{ github.head_ref }})
+          commit_messages=$(git log --reverse --format='%B----------' origin/${{ github.base_ref }}..origin/${{ github.head_ref }})
           echo "$commit_messages"
           
           # Markdown 형식으로 포맷팅합니다.
