@@ -61,7 +61,7 @@ jobs:
             
             # Markdown 형식으로 포맷팅합니다.
             if [ ! -z "$title" ]; then
-              pass
+              continue
             elif [ ! -z "$body" ]; then
               formatted_messages+="- **$title**  %0A> $body%0A%0A"
             else
