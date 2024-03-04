@@ -14,6 +14,7 @@ jobs:
           fetch-depth: 0
           
       - name: Get Commit Messages
+        if: github.event.action == 'opened'
         id: get-commit-messages
         # run: |
         #   commit_messages=$(git log --reverse --format='%B%n' origin/${{ github.base_ref }}..origin/${{ github.head_ref }})
@@ -50,6 +51,7 @@ jobs:
 
         
       - name: Ask ChatGPT for Summary
+        if: github.event.action == 'opened'
         id: chatgpt
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
@@ -83,6 +85,7 @@ jobs:
           echo "::set-output name=summary::$summary"
 
       - name: Find and Remove Previous Comment
+        if: github.event.action == 'opened'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -94,6 +97,7 @@ jobs:
 
       
       - name: Update PR description
+        if: github.event.action == 'opened'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -136,6 +140,7 @@ jobs:
 
           
       - name: Update PR description with markers
+        if: (github.event.action == 'synchronize' || github.event.action == 'reopened')
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
