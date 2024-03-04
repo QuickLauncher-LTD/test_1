@@ -51,7 +51,6 @@ jobs:
 
         
       - name: Ask ChatGPT for Summary
-        if: github.event.action == 'opened'
         id: chatgpt
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
@@ -97,6 +96,7 @@ jobs:
 
       
       - name: Update PR description
+        if: github.event.action == 'opened'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -162,7 +162,7 @@ jobs:
           # 🤖 AI 요약
           ${NEW_AI_SUMMARY}
           
-          ${AFTER_AI_SUMMARY}ㅏㅏ"
+          ${AFTER_AI_SUMMARY}"
 
           # PR 설명 업데이트
           gh pr edit ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --body "$UPDATED_DESCRIPTION"
