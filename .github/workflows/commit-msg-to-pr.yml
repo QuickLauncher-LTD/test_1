@@ -97,7 +97,6 @@ jobs:
 
       
       - name: Update PR description
-        if: github.event.action == 'opened'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
