@@ -70,7 +70,8 @@ jobs:
               formatted_messages+="- **$title**%0A%0A"
             fi
           done
-          
+
+          echo "$formatted_messages"
           # 포맷팅된 메시지를 출력 변수로 설정합니다.
           formatted_messages="${formatted_messages//'%'/'%25'}"
           formatted_messages="${formatted_messages//$'\n'/'%0A'}"
