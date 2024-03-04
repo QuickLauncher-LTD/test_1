@@ -52,13 +52,14 @@ jobs:
       - name: Get Commit Messages
         id: get-commit-messages
         run: |
-          commit_messages=$(git log --reverse --format='%n%s%n%n%b%n----------' origin/${{ github.base_ref }}..origin/${{ github.head_ref }})
+          commit_messages=$(git log --reverse --format='%s%n%n%b%n----------' origin/${{ github.base_ref }}..origin/${{ github.head_ref }})
           echo "$commit_messages"
           
           # Markdown 형식으로 포맷팅합니다.
           formatted_messages=""
           IFS=$'----------' 
           for message in $commit_messages; do
+            message=$(echo "$message" | sed '/^$/d')
             title=$(echo "$message" | head -n 1)
             body=$(echo "$message" | tail -n +2)
 
