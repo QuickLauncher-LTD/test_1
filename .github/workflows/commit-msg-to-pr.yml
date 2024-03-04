@@ -133,3 +133,32 @@ jobs:
           "
 
           gh pr edit ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --body "$UPDATED_DESCRIPTION"
+
+          
+      - name: Update PR description with markers
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # 기존 PR 설명 가져오기
+          PR_DESCRIPTION=$(gh pr view ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --json body -q .body)
+          
+          # 커밋 메시지와 AI 요약을 업데이트하기 위한 새로운 내용
+          NEW_COMMIT_MESSAGES=$(echo "${{ steps.get-commit-messages.outputs.messages }}" | sed 's/%0A/\n/g')
+          NEW_AI_SUMMARY=$(echo "${{ steps.chatgpt.outputs.summary }}" | sed 's/%0A/\n/g')
+          
+          # 마커를 사용하여 기존 설명에서 커밋 메시지와 AI 요약 섹션을 식별
+          BEFORE_COMMIT_MESSAGES=$(echo "$PR_DESCRIPTION" | sed -n '/<!-- Auto PR Summary Marker -->/,/#### 커밋 메시지/p' | sed '$d')
+          AFTER_AI_SUMMARY=$(echo "$PR_DESCRIPTION" | sed -n '/# ❓ Known issue/,$p')
+
+          # 새로운 PR 설명 생성
+          UPDATED_DESCRIPTION="${BEFORE_COMMIT_MESSAGES}
+          #### 커밋 메시지
+          ${NEW_COMMIT_MESSAGES}
+
+          # 🤖 AI 요약
+          ${NEW_AI_SUMMARY}
+          
+          ${AFTER_AI_SUMMARY}"
+
+          # PR 설명 업데이트
+          gh pr edit ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --body "$UPDATED_DESCRIPTION"
