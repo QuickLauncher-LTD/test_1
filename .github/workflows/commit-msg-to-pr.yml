@@ -33,7 +33,7 @@ jobs:
 
             title_trimmed=$(echo "$title" | xargs)
             body_trimmed=$(echo "$body" | xargs)
-            body_trimmed="${body_trimmed//$'\n'/'%0A> '}"
+            # body_trimmed="${body_trimmed//$'\n'/'%0A> '}"
             
                         
             if [ -z "$title" ]; then
@@ -41,7 +41,7 @@ jobs:
             fi
             
             if [ ! -z "$body" ]; then
-              formatted_messages+="- **$title_trimmed**  %0A> $body_trimmed%0A%0A"
+              formatted_messages+="- **$title_trimmed**  %0A> $body_trimmed%0A%0A >"
             else
               formatted_messages+="- **$title_trimmed**%0A%0A"
             fi
