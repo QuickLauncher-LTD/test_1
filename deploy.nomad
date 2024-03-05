@@ -10,9 +10,7 @@ job my_sample_app_qz5kzika {
         static = 21212
         to = 80
       }
-
     }
-
     service {
       name = "demo-quicklauncher"
       port = "http"
@@ -24,7 +22,6 @@ job my_sample_app_qz5kzika {
         timeout  = "2s"
       }
     }
-
     task "server" {
       driver = "docker"
 
