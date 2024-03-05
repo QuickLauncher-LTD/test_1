@@ -118,7 +118,7 @@ jobs:
           - [ ] All bugs are fixed
 
           # 💻  주요 개발 내용
-          #### 커밋 메시지
+          ### 커밋 메시지
           ${COMMIT_MESSAGES_FORMATTED}
 
           # 🤖 AI 요약
@@ -155,7 +155,7 @@ jobs:
           
           # 마커를 사용하여 기존 설명에서 커밋 메시지와 AI 요약 섹션을 식별
           BEFORE_COMMIT_MESSAGES=$(echo "$PR_DESCRIPTION" | sed -n '/<!-- Auto PR Summary Marker -->/,/#### 커밋 메시지/p' | sed '$d')
-          AFTER_AI_SUMMARY=$(echo "$PR_DESCRIPTION" | sed -n '/# ❓ Known issue/,$p')
+          AFTER_AI_SUMMARY=$(echo "$PR_DESCRIPTION" | sed -n '/# ⚙️ 테스트 내용 (모듈검증)/,$p')
 
           # 새로운 PR 설명 생성
           UPDATED_DESCRIPTION="${BEFORE_COMMIT_MESSAGES}
