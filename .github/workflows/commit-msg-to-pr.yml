@@ -35,6 +35,7 @@ jobs:
             body_trimmed=$(echo "$body" | xargs)
             body_trimmed="${body_trimmed//$'n'/'%0A> '}"
             body_trimmed="${body_trimmed//'-'/'> - '}"
+            body_trimmed=$(echo "$body_trimmed" | sed '/^> /!s/^/> /')
                         
             if [ -z "$title" ]; then
               continue
