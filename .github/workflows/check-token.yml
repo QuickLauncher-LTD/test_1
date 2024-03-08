@@ -1,0 +1,14 @@
+name: Check GitHub User Token
+
+on: [push]
+
+jobs:
+  check-user:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check GitHub Token Owner
+        run: |
+          USER_INFO=$(curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/user)
+          DAE_USER_INFO=$(curl -H "Authorization: token ${{ secrets.DAE_GITHUB_TOKEN }}" https://api.github.com/user)
+          echo "User Info: $USER_INFO"
+          echo "DAE_User Info: $DAE_USER_INFO"
