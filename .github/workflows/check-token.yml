@@ -1,14 +1,26 @@
-name: Check GitHub User Token
+name: Check Multiple GitHub User Tokens
 
 on: [push]
 
 jobs:
-  check-user:
+  check-users:
     runs-on: ubuntu-latest
     steps:
-      - name: Check GitHub Token Owner
+      - name: Check Multiple Tokens
+        env:
+          TOKEN1: ${{ secrets.GITHUB_TOKEN }}
+          TOKEN2: ${{ secrets.DAE_GITHUB_TOKEN }}
+          
         run: |
-          USER_INFO=$(curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/user)
-          DAE_USER_INFO=$(curl -H "Authorization: token ${{ secrets.DAE_GITHUB_TOKEN }}" https://api.github.com/user)
-          echo "User Info: $USER_INFO"
-          echo "DAE_User Info: $DAE_USER_INFO"
+          TOKENS=($TOKEN1 $TOKEN2 $TOKEN3)
+
+          # 각 토큰에 대해 사용자 정보 조회
+          for TOKEN in "${TOKENS[@]}"
+          do
+            if [ -n "$TOKEN" ]; then
+              USER_INFO=$(curl -H "Authorization: token $TOKEN" https://api.github.com/user)
+              echo "User Info: $USER_INFO"
+            else
+              echo "Token is empty, skipping..."
+            fi
+          done
