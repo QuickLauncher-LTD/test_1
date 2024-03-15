@@ -13,10 +13,15 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Setup environment
+          run: |
+            echo "HEAD_REF=${{ github.head_ref }}" >ㅋ $GITHUB_ENV
+            echo "BASE_REF=${{ github.base_ref }}" >> $GITHUB_ENV
+
       - name: Get Commit Messages
         id: get-commit-messages
         run: |
-          commit_messages=$(git log --reverse --format='%s%n%n%b%n₩₩₩' origin/${{ github.base_ref }}..origin/${{ github.head_ref }})
+          commit_messages=$(git log --reverse --format='%s%n%n%b%n₩₩₩' "origin/${BASE_REF}..origin/${HEAD_REF}")
           echo "$commit_messages"
           
           # Markdown 형식으로 포맷팅합니다.
