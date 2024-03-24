@@ -10,4 +10,7 @@
 
 A static HTML and CSS website that can be deployed with Docker.
 
-Uses the `nginx` image configured to run on the default Waypoint port 3000.
+Uses the `nginx` image configured to run on the default Waypoint port 3000.dd
+
+
+Gkd
