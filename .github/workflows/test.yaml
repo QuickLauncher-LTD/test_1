@@ -1,0 +1,176 @@
+name: Update PR Description with Commit Messages and AI Summary
+
+on:
+  pull_request_target:
+    types: [opened, reopened, synchronize]
+
+jobs:
+  update-description:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Setup environment
+        run: |
+          echo "HEAD_REF=${{ github.head_ref }}" >> $GITHUB_ENV
+          echo "BASE_REF=${{ github.base_ref }}" >> $GITHUB_ENV
+
+      - name: Get Commit Messages
+        id: get-commit-messages
+        run: |
+          commit_messages=$(git log --reverse --format='%s%n%n%b%n₩₩₩' "origin/${BASE_REF}..origin/${HEAD_REF}")
+          echo "$commit_messages"
+          
+          # Markdown 형식으로 포맷팅합니다.
+          formatted_messages=""
+          IFS=$'₩₩₩' 
+          for message in $commit_messages; do
+            message=$(echo "$message" | sed '/^$/d')
+            title=$(echo "$message" | head -n 1)
+            body=$(echo "$message" | tail -n +2)
+
+            echo "Message: ${message}"
+            echo "Title: ${title}"
+            echo "Body: ${body}"
+
+            title_trimmed=$(echo "$title" | xargs)
+            body_trimmed=$(echo "$body" | xargs)
+          
+            if [ -z "$title" ]; then
+              continue
+            fi
+          
+            if [ ! -z "$body" ]; then
+              formatted_messages+="- **$title_trimmed**  %0A> $body_trimmed%0A%0A"
+            else
+              formatted_messages+="- **$title_trimmed**%0A%0A"
+            fi
+          done
+
+          echo "$formatted_messages"
+          # 포맷팅된 메시지를 출력 변수로 설정합니다.
+          formatted_messages="${formatted_messages//'%'/'%25'}"
+          formatted_messages="${formatted_messages//$'\n'/'%0A'}"
+          formatted_messages="${formatted_messages//$'\r'/'%0D'}"
+          echo "::set-output name=messages::$formatted_messages"
+
+
+      - name: Ask ChatGPT for Summary
+        id: chatgpt
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          cat > payload.json <<EOF
+          {
+            "model": "gpt-3.5-turbo",
+            "messages": [
+              {
+                "role": "system",
+                "content": "You are a helpful assistant and a specialist of github and software."
+              },
+              {
+                "role": "user",
+                "content": "다음은 최근 GitHub 풀 리퀘스트에 포함된 커밋 메시지들입니다. 이 변경 이력을 바탕으로, 코드 리뷰어들이 변경 사항의 목적과 중요한 포인트를 쉽게 이해할 수 있도록 요약해주세요. 각 커밋의 주요 내용을 간략하게 설명하고, 변경 사항이 프로젝트에 미치는 영향에 대해 논의해주세요. 또한, 리뷰어들이 특히 주의 깊게 살펴봐야 할 부분이 있다면, 그 부분에 대해 강조해주세요. 커밋 메시지들은 다음과 같습니다:\n${{ steps.get-commit-messages.outputs.messages }} \n\n이 정보를 바탕으로, 코드 리뷰 프로세스를 개선하고, 리뷰어들이 변경 사항의 맥락을 더 잘 이해할 수 있도록 도와주세요."
+              }
+            ],
+            "temperature": 0.7,
+            "max_tokens": 500
+          }
+          EOF
+          
+          response=$(curl -s -X POST "https://api.openai.com/v1/chat/completions" \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer $OPENAI_API_KEY" \
+            -d @payload.json)
+          summary=$(echo $response | jq -r '.choices[0].message.content')
+          summary="${summary//'%'/'%25'}"
+          summary="${summary//$'\n'/'%0A'}"
+          summary="${summary//$'\r'/'%0D'}"
+          echo "::set-output name=summary::$summary"
+
+      - name: Find and Remove Previous Comment
+        if: github.event.action == 'opened'
+        env:
+          GITHUB_TOKEN: ${{ secrets.TEST_GITHUB_TOKEN }}
+        run: |
+          comment_id=$(gh pr view ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --json comments -q '.comments[].id' | jq 'select(.body | contains("<!-- AI Summary Marker -->"))' | jq '.id')
+          echo "$comment_id"
+          if [ ! -z "$comment_id" ]; then
+            gh api -X DELETE /repos/${{ github.repository }}/issues/comments/$comment_id
+          fi
+
+
+      - name: Update PR description
+        if: github.event.action == 'opened'
+        env:
+          GITHUB_TOKEN: ${{ secrets.TEST_GITHUB_TOKEN }}
+        run: |
+          PR_DESCRIPTION=$(gh pr view ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --json body -q .body)
+          COMMIT_MESSAGES_FORMATTED=$(echo "${{ steps.get-commit-messages.outputs.messages }}" | sed 's/%0A/\n/g')
+          AI_SUMMARY=$(echo "${{ steps.chatgpt.outputs.summary }}" | sed 's/%0A/\n/g')
+          
+          UPDATED_DESCRIPTION="
+          ---
+          <!-- Auto PR Summary Marker -->
+          
+          # ✅  PR Check List
+          - [ ] Self code review finished
+          - [ ] Spotless / static analysis finished
+          - [ ] Module test finished
+          - [ ] All bugs are fixed
+
+          # 💻  주요 개발 내용
+          #### 커밋 메시지
+          ${COMMIT_MESSAGES_FORMATTED}
+
+          # 🤖 AI 요약
+          ${AI_SUMMARY}
+
+          # ⚙️ 테스트 내용 (모듈검증)
+
+          # ⚙️ 테스트 내용 (통합검증)
+          - 로컬 통합 테스트
+
+          # ❓ Known issue
+          - 없음
+
+          # 🙏 To Reviewer
+          - 없음
+
+          # 🎫 Ticket 
+          "
+
+          gh pr edit ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --body "$UPDATED_DESCRIPTION"
+
+
+      - name: Update PR description with markers
+        if: (github.event.action == 'synchronize' || github.event.action == 'reopened')
+        env:
+          GITHUB_TOKEN: ${{ secrets.TEST_GITHUB_TOKEN }}
+        run: |
+          # 기존 PR 설명 가져오기
+          PR_DESCRIPTION=$(gh pr view ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --json body -q .body)
+          
+          # 커밋 메시지와 AI 요약을 업데이트하기 위한 새로운 내용
+          NEW_COMMIT_MESSAGES=$(echo "${{ steps.get-commit-messages.outputs.messages }}" | sed 's/%0A/\n/g')
+          NEW_AI_SUMMARY=$(echo "${{ steps.chatgpt.outputs.summary }}" | sed 's/%0A/\n/g')
+          
+          # 마커를 사용하여 기존 설명에서 커밋 메시지와 AI 요약 섹션을 식별
+          BEFORE_COMMIT_MESSAGES=$(echo "$PR_DESCRIPTION" | sed -n '/<!-- Auto PR Summary Marker -->/,/#### 커밋 메시지/p' | sed '$d')
+          AFTER_AI_SUMMARY=$(echo "$PR_DESCRIPTION" | sed -n '/# ⚙️ 테스트 내용 (모듈검증)/,$p')
+
+          # 새로운 PR 설명 생성
+          UPDATED_DESCRIPTION="${BEFORE_COMMIT_MESSAGES}
+          #### 커밋 메시지
+          ${NEW_COMMIT_MESSAGES}
+
+          # 🤖 AI 요약
+          ${NEW_AI_SUMMARY}
+          
+          ${AFTER_AI_SUMMARY}"
+
+          # PR 설명 업데이트
+          gh pr edit ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --body "$UPDATED_DESCRIPTION"
