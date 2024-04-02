@@ -13,10 +13,10 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup environment
-        run: |
-          echo "HEAD_REF=${{ github.head_ref }}" >> $GITHUB_ENV
-          echo "BASE_REF=${{ github.base_ref }}" >> $GITHUB_ENV
+      # - name: Setup environment
+      #   run: |
+      #     echo "HEAD_REF=${{ github.head_ref }}" >> $GITHUB_ENV
+      #     echo "BASE_REF=${{ github.base_ref }}" >> $GITHUB_ENV
 
       - name: Validate refs
         env:
