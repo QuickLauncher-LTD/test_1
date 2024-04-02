@@ -18,6 +18,18 @@ jobs:
           echo "HEAD_REF=${{ github.head_ref }}" >> $GITHUB_ENV
           echo "BASE_REF=${{ github.base_ref }}" >> $GITHUB_ENV
 
+      - name: Validate branch names
+        run: |
+          if [[ "$HEAD_REF" =~ ^(feature/|bugfix/|hotfix/) ]] && [[ "$BASE_REF" == "develop" || "$BASE_REF" == "master" ]]; then
+            echo "Branch names are valid."
+          else
+            echo "Invalid branch names detected."
+            exit 1
+          fi
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+          BASE_REF: ${{ github.base_ref }}
+
       - name: Get Commit Messages
         id: get-commit-messages
         run: |
