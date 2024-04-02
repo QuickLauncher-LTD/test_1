@@ -19,21 +19,21 @@ jobs:
           echo "BASE_REF=${{ github.base_ref }}" >> $GITHUB_ENV
 
       - name: Validate refs
-         env:
-           HEAD_REF: ${{ github.head_ref }}
-           BASE_REF: ${{ github.base_ref }}
-         run: |
-           if ! [[ "$HEAD_REF" =~ ^[a-zA-Z0-9_-]+$ ]]; then
-             echo "HEAD_REF is invalid"
-             exit 1
-           fi
-           if [[ "$BASE_REF" != "develop" && "$BASE_REF" != "master" ]]; then
-             echo "BASE_REF is invalid"
-             exit 1
-           fi
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          if ! [[ "$HEAD_REF" =~ ^[a-zA-Z0-9_-]+$ ]]; then
+            echo "HEAD_REF is invalid"
+            exit 1
+          fi
+          if [[ "$BASE_REF" != "develop" && "$BASE_REF" != "master" ]]; then
+            echo "BASE_REF is invalid"
+            exit 1
+          fi
    
-           echo "HEAD_REF=$HEAD_REF" >> $GITHUB_ENV
-           echo "BASE_REF=$BASE_REF" >> $GITHUB_ENV
+          echo "HEAD_REF=$HEAD_REF" >> $GITHUB_ENV
+          echo "BASE_REF=$BASE_REF" >> $GITHUB_ENV
 
       - name: Get Commit Messages
         id: get-commit-messages
