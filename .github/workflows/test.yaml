@@ -18,7 +18,7 @@ jobs:
           HEAD_REF: ${{ github.head_ref }}
           BASE_REF: ${{ github.base_ref }}
         run: |
-          if ! [[ "$HEAD_REF" =~ ^[a-zA-Z0-9_-/]+$ ]]; then
+          if ! [[ "$HEAD_REF" =~ ^[a-zA-Z0-9_/-]+$ ]]; then
             echo "HEAD_REF is invalid"
             exit 1
           fi
