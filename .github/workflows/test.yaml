@@ -106,7 +106,7 @@ jobs:
       - name: Find and Remove Previous Comment
         if: github.event.action == 'opened'
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.TEST_GITHUB_TOKEN }}
         run: |
           comment_id=$(gh pr view ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --json comments -q '.comments[].id' | jq 'select(.body | contains("<!-- AI Summary Marker -->"))' | jq '.id')
           echo "$comment_id"
@@ -118,7 +118,7 @@ jobs:
       - name: Update PR description
         if: github.event.action == 'opened'
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.TEST_GITHUB_TOKEN }}
         run: |
           PR_DESCRIPTION=$(gh pr view ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --json body -q .body)
           COMMIT_MESSAGES_FORMATTED=$(echo "${{ steps.get-commit-messages.outputs.messages }}" | sed 's/%0A/\n/g')
@@ -161,7 +161,7 @@ jobs:
       - name: Update PR description with markers
         if: (github.event.action == 'synchronize' || github.event.action == 'reopened')
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.TEST_GITHUB_TOKEN }}
         run: |
           # 기존 PR 설명 가져오기
           PR_DESCRIPTION=$(gh pr view ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --json body -q .body)
